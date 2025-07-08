@@ -409,41 +409,60 @@ const Post = ({ data }) => {
           </p>
         )}
         {data?.media && data.media.length > 0 && (
-          <div className="mt-4 grid grid-cols-3 gap-1">
-            {displayedImages.map((mediaItem, index) => (
+          <div className="mt-4">
+            {data.media.length === 1 ? (
               <div
-                key={index}
-                className="relative cursor-pointer group"
-                onClick={() => openLightbox(index)}
+                className="flex justify-center cursor-pointer"
+                onClick={() => openLightbox(0)}
               >
                 <img
-                  src={`https://graduation.amiralsayed.me${mediaItem.url}`}
-                  alt={`Post media ${index}`}
-                  className="w-full h-48 object-cover rounded-lg"
+                  src={`https://graduation.amiralsayed.me${data.media[0].url}`}
+                  alt="Post media"
+                  className="max-w-full max-h-[400px] rounded-lg"
                 />
-                {index === 2 && extraImagesCount > 0 && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold rounded-lg">
-                    +{extraImagesCount}
-                  </div>
-                )}
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-3 gap-1">
+                {displayedImages.map((mediaItem, index) => (
+                  <div
+                    key={index}
+                    className="relative cursor-pointer group"
+                    onClick={() => openLightbox(index)}
+                  >
+                    <img
+                      src={`https://graduation.amiralsayed.me${mediaItem.url}`}
+                      alt={`Post media ${index}`}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    {index === 2 && extraImagesCount > 0 && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold rounded-lg">
+                        +{extraImagesCount}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {/* قسم الـ Tags */}
-        {data?.tags && data.tags.length > 0 && data.tags.every(tag => tag) && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {data.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 text-sm rounded-2xl text-white"
-                style={{ backgroundColor: tagColors[tag] || getRandomColor() }}
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
+        {data?.tags &&
+          data.tags.length > 0 &&
+          data.tags.every((tag) => tag) && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {data.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 text-sm rounded-2xl text-white"
+                  style={{
+                    backgroundColor: tagColors[tag] || getRandomColor(),
+                  }}
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
       </div>
       <div className="flex items-center justify-between px-4 py-2 border-t border-background-card">
         <div className="flex items-center space-x-2">
