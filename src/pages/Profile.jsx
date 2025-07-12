@@ -56,7 +56,7 @@ const ProfilePage = () => {
     friends: userData?.friends.length ?? 0,
     joinDate: formatDate(userData?.createdAt),
     avatar: `https://graduation.amiralsayed.me${userData?.avatarUrl}`,
-    coverImage: `https://graduation.amiralsayed.me${userData?.coverImageUrl}`,
+    coverImage: `https://graduation.amiralsayed.me${userData?.coverUrl}`,
     stats: {
       postsCreated: userData?.posts.length ?? 0,
       sharedPosts: userData?.sharedPosts.length ?? 0,

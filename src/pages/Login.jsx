@@ -103,48 +103,6 @@ const Login = () => {
           {isSignUp ? "Sign up to your Citio account" : "Sign in to your Citio account"}
         </h4>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {isSignUp && (
-            <div className="space-y-6">
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="block text-sm font-medium text-gray-600 mb-2"
-                >
-                  Full Name
-                </label>
-                <input
-                  required
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={inputs.fullName}
-                  onChange={handleChange}
-                  className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-citio-blue hover:border-citio-blue/50 placeholder:text-gray-500"
-                  placeholder="Enter your full name"
-                  disabled={mutation.isLoading}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="phoneNumber"
-                  className="block text-sm font-medium text-gray-600 mb-2"
-                >
-                  Phone Number
-                </label>
-                <input
-                  required
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={inputs.phoneNumber}
-                  onChange={handleChange}
-                  className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-citio-blue hover:border-citio-blue/50 placeholder:text-gray-500"
-                  placeholder="Enter your phone number"
-                  disabled={mutation.isLoading}
-                />
-              </div>
-            </div>
-          )}
           <div>
             <label
               htmlFor="email"
@@ -195,45 +153,13 @@ const Login = () => {
                 )}
               </button>
             </div>
-            {isSignUp && (
-              <div className="mt-6 relative">
-                <label
-                  htmlFor="confirmpass"
-                  className="block text-sm font-medium text-gray-600 mb-2"
-                >
-                  Confirm Password
-                </label>
-                <input
-                  required
-                  type={showPassword ? "text" : "password"}
-                  id="confirmpass"
-                  name="confirmpass"
-                  value={inputs.confirmpass}
-                  onChange={handleChange}
-                  className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-citio-blue hover:border-citio-blue/50 placeholder:text-gray-500 pr-12"
-                  placeholder="Confirm your password"
-                  disabled={mutation.isLoading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-citio-blue"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            )}
           </div>
           <span
             className={`text-sm text-red-600 ${confirmPass ? "hidden" : ""}`}
           >
             * Confirm password does not match
           </span>
-          {!isSignUp && (
+          {/* {!isSignUp && (
             <div className="text-right">
               <a
                 href="#"
@@ -242,7 +168,7 @@ const Login = () => {
                 Forgot Password?
               </a>
             </div>
-          )}
+          )} */}
           <button
             type="submit"
             className="w-full bg-blue-900 cursor-pointer text-white py-3 rounded-xl hover:bg-blue-800 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -265,18 +191,6 @@ const Login = () => {
             </p>
           )}
         </form>
-        <p className="text-center text-sm text-gray-500 mt-6">
-          {isSignUp ? "Already have an account? " : "Don’t have an account? "}
-          <span
-            className="text-blue-600 hover:text-blue-500 transition-colors cursor-pointer"
-            onClick={() => {
-              resetForm();
-              setIsSignUp((prev) => !prev);
-            }}
-          >
-            {isSignUp ? "Login" : "Sign Up"}
-          </span>
-        </p>
       </div>
     </div>
   );

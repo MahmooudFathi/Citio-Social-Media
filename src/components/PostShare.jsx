@@ -7,6 +7,7 @@ import { useAuth } from "../Context/AuthContext";
 
 const PostShare = () => {
   const [postCaption, setPostCaption] = useState("");
+  const [tag, setTag] = useState("");
   const [images, setImages] = useState([]);
   const imageRef = useRef();
   const queryClient = useQueryClient();
@@ -17,6 +18,7 @@ const PostShare = () => {
     mutationFn: async (newPost) => {
       const formData = new FormData();
       formData.append("postCaption", newPost.postCaption);
+      formData.append("tag", newPost.tag);
 
       if (newPost.media && newPost.media.length > 0) {
         newPost.media.forEach((file) => {
@@ -24,7 +26,12 @@ const PostShare = () => {
         });
       }
 
-      const res = await fetch("https://graduation.amiralsayed.me/api/posts", {
+      const endpoint =
+        userData?.role === "admin" || userData?.role === "superAdmin"
+          ? "https://graduation.amiralsayed.me/api/posts/admin"
+          : "https://graduation.amiralsayed.me/api/posts";
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -71,7 +78,7 @@ const PostShare = () => {
       alert("يجب إدخال نص أو صورة!");
       return;
     }
-    mutation.mutate({ postCaption, media: images });
+    mutation.mutate({ postCaption, media: images, tag });
   };
 
   const handleKeyDown = (e) => {
@@ -105,6 +112,16 @@ const PostShare = () => {
           className="flex-1 bg-background-card border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-citio-blue focus:bg-white transition-colors text-citio-gray"
         />
       </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          placeholder="مثلاً: Alert أو Media أو أي تصنيف"
+          className="w-full bg-background-card border border-gray-300 rounded-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-citio-blue"
+        />
+      </div>
+
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div
@@ -113,10 +130,6 @@ const PostShare = () => {
           >
             <HiOutlinePhoto className="w-5 h-5" />
             <span>Photo</span>
-          </div>
-          <div className="option flex items-center cursor-pointer space-x-2 text-citio-orange hover:text-citio-orange/80 text-sm font-medium transition-colors">
-            <PiPlayCircle className="w-5 h-5" />
-            <span>Video</span>
           </div>
           <div className="option flex items-center cursor-pointer space-x-2 text-citio-blue hover:text-citio-blue/80 text-sm font-medium transition-colors">
             <span>😊 Feeling</span>

@@ -162,17 +162,6 @@ const Header = () => {
                 Roles
               </Link>
             )}
-            <Link
-              to="/notifications"
-              className={`hover:text-citio-blue/80 pb-2 px-1 font-medium transition-colors ${
-                currentPath === "/notifications"
-                  ? "text-citio-blue border-b-2 border-citio-blue"
-                  : ""
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Notifications
-            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -234,14 +223,6 @@ const Header = () => {
                   )}
                 </div>
               )}
-            </div>
-            <div className="relative cursor-pointer">
-              <Link to="/notifications">
-                <Bell className="w-6 h-6 text-citio-gray hover:text-citio-dark transition-colors" />
-              </Link>
-              <span className="absolute -top-2 -right-2 bg-[#EF4444] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium">
-                3
-              </span>
             </div>
             <Link to="/profile">
               <img
