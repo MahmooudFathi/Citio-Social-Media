@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useAuth } from "../Context/AuthContext";
 
 const EditPostModal = ({ postId, postData, onClose, onUpdate }) => {
+  const { userData } = useAuth();
   const [caption, setCaption] = useState(postData.postCaption || "");
   const [tags, setTags] = useState(
     postData.tags?.filter((tag) => tag && tag.trim() !== "") || []
@@ -11,7 +13,7 @@ const EditPostModal = ({ postId, postData, onClose, onUpdate }) => {
     postData.availability || "public"
   );
   const [mediaFiles, setMediaFiles] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = userData?.token || localStorage.getItem("token");
 
   useEffect(() => {
     setCaption(postData.postCaption || "");

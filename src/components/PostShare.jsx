@@ -12,7 +12,7 @@ const PostShare = () => {
   const imageRef = useRef();
   const queryClient = useQueryClient();
   const { userData } = useAuth();
-  const token = localStorage.getItem("token");
+  const token = userData?.token || localStorage.getItem("token");
 
   const mutation = useMutation({
     mutationFn: async (newPost) => {

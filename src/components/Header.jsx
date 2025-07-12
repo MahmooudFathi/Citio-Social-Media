@@ -35,7 +35,7 @@ const Header = () => {
   const fetchPosts = async (query) => {
     if (!query) return { data: [] };
 
-    const token = localStorage.getItem("token") || "";
+    const token = userData?.token || localStorage.getItem("token") || "";
     const response = await axios.get(
       `https://graduation.amiralsayed.me/api/users/search?q=${encodeURIComponent(
         query

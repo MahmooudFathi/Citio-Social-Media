@@ -11,7 +11,6 @@ import toast from "react-hot-toast";
 import { useAuth } from "../Context/AuthContext";
 
 const BASE_URL = "https://graduation.amiralsayed.me/api/comments";
-const token = localStorage.getItem("token");
 
 function formatUsername(username) {
   if (!username) return "";
@@ -21,7 +20,7 @@ function formatUsername(username) {
     .replace(/\d+$/, "");
 }
 
-const fetchUser = async (userId) => {
+const fetchUser = async (userId, token) => {
   try {
     const res = await axios.get(
       `https://graduation.amiralsayed.me/api/users/${userId}`,
@@ -36,7 +35,7 @@ const fetchUser = async (userId) => {
   }
 };
 
-const fetchComments = async ({ queryKey }) => {
+const fetchComments = async ({ queryKey, token }) => {
   try {
     const [, postId] = queryKey;
     const res = await axios.get(`${BASE_URL}/post/${postId}`, {
@@ -56,7 +55,7 @@ const fetchComments = async ({ queryKey }) => {
   }
 };
 
-const postComment = async ({ postId, content, parentCommentId }) => {
+const postComment = async ({ postId, content, parentCommentId, token }) => {
   return axios.post(
     `${BASE_URL}/post/${postId}`,
     { content, parentCommentId },
@@ -69,13 +68,13 @@ const postComment = async ({ postId, content, parentCommentId }) => {
   );
 };
 
-const deleteComment = async (commentId) => {
+const deleteComment = async (commentId, token) => {
   return axios.delete(`${BASE_URL}/${commentId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 };
 
-const updateComment = async ({ commentId, content }) => {
+const updateComment = async ({ commentId, content, token }) => {
   return axios.put(
     `${BASE_URL}/${commentId}`,
     { content },
@@ -88,7 +87,7 @@ const updateComment = async ({ commentId, content }) => {
   );
 };
 
-const reactToComment = async ({ commentId, impressionType }) => {
+const reactToComment = async ({ commentId, impressionType, token }) => {
   return axios.post(
     `${BASE_URL}/${commentId}/reactions`,
     { impressionType },
@@ -114,6 +113,7 @@ const Comments = ({ postId }) => {
   const [expandedComments, setExpandedComments] = useState(new Set());
   const [editContent, setEditContent] = useState("");
   const { userData } = useAuth();
+  const token = userData?.token || localStorage.getItem("token");
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRef = useRef(null);
 

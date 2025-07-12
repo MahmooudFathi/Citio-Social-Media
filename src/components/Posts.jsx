@@ -4,10 +4,9 @@ import Post from "./Post";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import InfiniteScroll from "react-infinite-scroll-component";
 import toast from "react-hot-toast";
+import { useAuth } from "../Context/AuthContext"
 
-const token = localStorage.getItem("token");
-
-const fetchUser = async (userId) => {
+const fetchUser = async (userId, token) => {
   try {
     const res = await axios.get(
       `https://graduation.amiralsayed.me/api/users/${userId}`,
@@ -22,7 +21,7 @@ const fetchUser = async (userId) => {
   }
 };
 
-const fetchPosts = async ({ pageParam = 1, scope, isProfilePage, userId }) => {
+const fetchPosts = async ({ pageParam = 1, scope, isProfilePage, userId, token }) => {
   if (!token) throw new Error("Unauthorized: No Token Found");
 
   const url = isProfilePage
@@ -48,7 +47,7 @@ const fetchPosts = async ({ pageParam = 1, scope, isProfilePage, userId }) => {
     // جلب بيانات المستخدم لكل منشور
     const postsWithUserData = await Promise.all(
       posts.map(async (post) => {
-        const userData = await fetchUser(post.author);
+        const userData = await fetchUser(post.author, token);
         return { ...post, user: userData };
       })
     );
@@ -68,12 +67,13 @@ const fetchPosts = async ({ pageParam = 1, scope, isProfilePage, userId }) => {
 
 const Posts = ({ scope, userId }) => {
   const isProfilePage = !!userId;
-
+  const { userData } = useAuth();
+  const token = userData?.token || localStorage.getItem("token");
   const { data, fetchNextPage, hasNextPage, isLoading, error } =
     useInfiniteQuery({
       queryKey: isProfilePage ? ["userPosts", userId] : ["posts", scope],
       queryFn: ({ pageParam = 1 }) =>
-        fetchPosts({ pageParam, scope, isProfilePage, userId }),
+        fetchPosts({ pageParam, scope, isProfilePage, userId, token }),
       getNextPageParam: (lastPage) => lastPage.nextPage,
       staleTime: 5000,
     });

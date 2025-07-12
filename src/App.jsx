@@ -12,8 +12,8 @@ import ProfilePage from "./pages/Profile";
 
 function App() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
   const { userData } = useAuth();
+  const token = userData?.token || localStorage.getItem("token");
   const isAuthenticated = token && !isTokenExpired();
   useEffect(() => {
     const interval = setInterval(() => {

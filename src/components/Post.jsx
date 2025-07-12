@@ -14,7 +14,7 @@ import {
   Laugh,
 } from "lucide-react";
 import { useAuth } from "../Context/AuthContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import axios from "axios";
 import ImageGallery from "react-image-gallery";
@@ -58,7 +58,7 @@ const Post = ({ data }) => {
   const toastId = useRef(null);
   const lightboxRef = useRef(null);
   const queryClient = useQueryClient();
-  const token = localStorage.getItem("token");
+  const token = userData?.token || localStorage.getItem("token");
 
   const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
 
@@ -69,6 +69,30 @@ const Post = ({ data }) => {
       .replace(/\b\w/g, (char) => char.toUpperCase())
       .replace(/\d+$/, "");
   }
+
+  // دالة جلب بيانات المستخدم
+  const fetchUser = async (userId) => {
+    try {
+      const res = await axios.get(
+        `https://graduation.amiralsayed.me/api/users/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return res.data;
+    } catch (error) {
+      toast.error("Error fetching user:", error);
+      return { name: "Unknown", avatarUrl: null }; // بيانات افتراضية عند الفشل
+    }
+  };
+
+  const { data: originalAuthorData, isLoading: isLoadingOriginalAuthor } =
+    useQuery({
+      queryKey: ["user", data.originalPost?.originalAuthor],
+      queryFn: () => fetchUser(data.originalPost.originalAuthor),
+      enabled: !!data.sharedPost && !!data.originalPost?.originalAuthor,
+      staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -326,6 +350,26 @@ const Post = ({ data }) => {
                   ? formatUsername(data.user.localUserName)
                   : "Loading..."}
               </Link>
+              {data.sharedPost && data.originalPost && (
+                <div className=" p-2 text-sm text-gray-700 flex items-center">
+                  <span>shared a post from </span>
+                  <Link
+                    to={`/user/${data.originalPost.originalAuthor}`}
+                    className="font-semibold pl-3 text-text-primary text-base hover:underline"
+                  >
+                    {isLoadingOriginalAuthor
+                      ? "Loading..."
+                      : originalAuthorData
+                      ? formatUsername(originalAuthorData.localUserName)
+                      : formatUsername(
+                          data.originalPost.originalAuthor
+                            .split("-")
+                            .join("")
+                            .slice(0, 10)
+                        )}
+                  </Link>
+                </div>
+              )}
               {userData?.role !== "user" && (
                 <MdVerified className="text-blue-500 w-4 h-4" />
               )}
@@ -408,62 +452,143 @@ const Post = ({ data }) => {
             {data?.postCaption || "No caption"}
           </p>
         )}
-        {data?.media && data.media.length > 0 && (
-          <div className="mt-4">
-            {data.media.length === 1 ? (
-              <div
-                className="flex justify-center cursor-pointer"
-                onClick={() => openLightbox(0)}
+      </div>
+      {/* Original Post Content (if it's a shared post) */}
+      {data.sharedPost && data.originalPost && (
+        <div className="mx-4 mb-4 border border-gray-200 rounded-lg bg-gray-50">
+          {/* Original post header */}
+          <div className="flex items-center space-x-3 p-3 border-b border-gray-200">
+            <img
+              src={
+                originalAuthorData?.avatarUrl
+                  ? `https://graduation.amiralsayed.me${originalAuthorData.avatarUrl}`
+                  : ProfileImage
+              } // يفضل إضافة صورة المستخدم الأصلي هنا
+              alt={originalAuthorData?.name || "Original author"}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+              <Link
+                to={`/user/${data.originalPost.originalAuthor}`}
+                className="font-semibold text-text-primary text-sm hover:underline"
               >
-                <img
-                  src={`https://graduation.amiralsayed.me${data.media[0].url}`}
-                  alt="Post media"
-                  className="max-w-full max-h-[400px] rounded-lg"
-                />
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1">
-                {displayedImages.map((mediaItem, index) => (
+                {isLoadingOriginalAuthor
+                  ? "Loading..."
+                  : originalAuthorData
+                  ? formatUsername(originalAuthorData.localUserName)
+                  : formatUsername(
+                      data.originalPost.originalAuthor
+                        .split("-")
+                        .join("")
+                        .slice(0, 10)
+                    )}
+              </Link>
+            </div>
+          </div>
+
+          {/* Original post content */}
+          <div className="p-3">
+            <p
+              className="text-secondary-text text-sm leading-relaxed"
+              dir={isArabic(data.originalPost.caption) ? "rtl" : "ltr"}
+            >
+              {data.originalPost.caption || "No caption"}
+            </p>
+
+            {/* Original post media */}
+            {data?.media && data.media.length > 0 && (
+              <div className="mt-3">
+                {data.media.length === 1 ? (
                   <div
-                    key={index}
-                    className="relative cursor-pointer group"
-                    onClick={() => openLightbox(index)}
+                    className="flex justify-center cursor-pointer"
+                    onClick={() => openLightbox(0)}
                   >
                     <img
-                      src={`https://graduation.amiralsayed.me${mediaItem.url}`}
-                      alt={`Post media ${index}`}
-                      className="w-full h-48 object-cover rounded-lg"
+                      src={`https://graduation.amiralsayed.me${data.media[0].url}`}
+                      alt="Post media"
+                      className="max-w-full max-h-[300px] rounded-lg"
                     />
-                    {index === 2 && extraImagesCount > 0 && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold rounded-lg">
-                        +{extraImagesCount}
-                      </div>
-                    )}
                   </div>
-                ))}
+                ) : (
+                  <div className="grid grid-cols-3 gap-1">
+                    {displayedImages.map((mediaItem, index) => (
+                      <div
+                        key={index}
+                        className="relative cursor-pointer group"
+                        onClick={() => openLightbox(index)}
+                      >
+                        <img
+                          src={`https://graduation.amiralsayed.me${mediaItem.url}`}
+                          alt={`Post media ${index}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        {index === 2 && extraImagesCount > 0 && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold rounded-lg">
+                            +{extraImagesCount}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-        {/* قسم الـ Tags */}
-        {data?.tags &&
-          data.tags.length > 0 &&
-          data.tags.every((tag) => tag) && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {data.tags.map((tag, index) => (
-                <span
+        </div>
+      )}
+      {!data.sharedPost && data?.media && data.media.length > 0 && (
+        <div className="mt-4">
+          {data.media.length === 1 ? (
+            <div
+              className="flex justify-center cursor-pointer"
+              onClick={() => openLightbox(0)}
+            >
+              <img
+                src={`https://graduation.amiralsayed.me${data.media[0].url}`}
+                alt="Post media"
+                className="max-w-full max-h-[400px] rounded-lg"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1">
+              {displayedImages.map((mediaItem, index) => (
+                <div
                   key={index}
-                  className="px-2 py-1 text-sm rounded-2xl text-white"
-                  style={{
-                    backgroundColor: tagColors[tag] || getRandomColor(),
-                  }}
+                  className="relative cursor-pointer group"
+                  onClick={() => openLightbox(index)}
                 >
-                  #{tag}
-                </span>
+                  <img
+                    src={`https://graduation.amiralsayed.me${mediaItem.url}`}
+                    alt={`Post media ${index}`}
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                  {index === 2 && extraImagesCount > 0 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-bold rounded-lg">
+                      +{extraImagesCount}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}
-      </div>
+        </div>
+      )}
+      {/* قسم الـ Tags */}
+      {data?.tags && data.tags.length > 0 && data.tags.every((tag) => tag) && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {data.tags.map((tag, index) => (
+            <span
+              key={index}
+              className="px-2 py-1 text-sm rounded-2xl text-white"
+              style={{
+                backgroundColor: tagColors[tag] || getRandomColor(),
+              }}
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="flex items-center justify-between px-4 py-2 border-t border-background-card">
         <div className="flex items-center space-x-2">
           <div className="flex -space-x-1">

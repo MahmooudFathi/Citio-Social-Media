@@ -26,11 +26,11 @@ const formatDate = (dateString) => {
   return dateString.split("T")[0]; // تقطيع عند T وأخذ الجزء الأول (التاريخ فقط)
 };
 
-const fetchUser = async (userId) => {
+const fetchUser = async (userId, token) => {
   try {
     const res = await axios.get(
       `https://graduation.amiralsayed.me/api/users/${userId}`,
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     return res.data;
   } catch (error) {
@@ -39,14 +39,14 @@ const fetchUser = async (userId) => {
   }
 };
 const ProfilePage = () => {
-  const token = localStorage.getItem("token");
+  const { userData } = useAuth();
+  const token = userData?.token || localStorage.getItem("token");
   const [selectedTab, setSelectedTab] = useState("My Posts");
   const [postsData, setPostsData] = useState({
     myPosts: [],
     sharedPosts: [],
     savedPosts: [],
   });
-  const { userData } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false); // حالة المودال
   const userId = userData?.centralUsrId;
   const profileData = {
@@ -76,14 +76,12 @@ const ProfilePage = () => {
               `https://graduation.amiralsayed.me/api/posts/${postId}`,
               {
                 headers: {
-                  Authorization: `Bearer ${
-                    token || localStorage.getItem("token")
-                  }`,
+                  Authorization: `Bearer ${token}`,
                 },
               }
             );
             const authorId = res.data.data.author;
-            const userData = await fetchUser(authorId);
+            const userData = await fetchUser(authorId, token);
             return { ...res.data.data, user: userData };
           } catch (error) {
             console.error(`Error fetching post ${postId}:`, error);
@@ -102,13 +100,13 @@ const ProfilePage = () => {
                 {
                   headers: {
                     Authorization: `Bearer ${
-                      token || localStorage.getItem("token")
+                      token
                     }`,
                   },
                 }
               );
               const authorId = res.data.data.author;
-              const userData = await fetchUser(authorId);
+              const userData = await fetchUser(authorId, token);
               return { ...res.data.data, user: userData };
             } catch (error) {
               console.error(
@@ -131,13 +129,13 @@ const ProfilePage = () => {
                 {
                   headers: {
                     Authorization: `Bearer ${
-                      token || localStorage.getItem("token")
+                      token
                     }`,
                   },
                 }
               );
               const authorId = res.data.data.author;
-              const userData = await fetchUser(authorId);
+              const userData = await fetchUser(authorId , token);
               return { ...res.data.data, user: userData };
             } catch (error) {
               console.error(`Error fetching saved post ${postId}:`, error);
